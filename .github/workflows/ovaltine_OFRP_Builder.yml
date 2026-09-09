@@ -19,7 +19,7 @@ on:
       DEVICE_TREE:
         description: 'OrangeFox 设备树'
         required: true
-        default: 'https://github.com/QQiuAaaa/ofrp_device_oneplus_ovaltine-fox_12.1_completed'
+        default: 'https://github.com/QQiuAaaa/ofrp_device_oneplus_ovaltine-fox_12.1'
       DEVICE_TREE_BRANCH:
         description: 'OrangeFox 设备树分支'
         required: true
@@ -109,8 +109,6 @@ jobs:
           git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git clone https://gitlab.com/OrangeFox/sync.git -b master
           cd sync
-          # 限制 repo sync 并发数，降低磁盘瞬时占用峰值，避免 runner 空间耗尽（No space left on device）
-          sed -i 's/-j$(nproc --all)/-j8/g' orangefox_sync.sh
           ./orangefox_sync.sh --branch ${{ inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
 
       - name: 📡 修复 fox_14.1 WLAN 支持

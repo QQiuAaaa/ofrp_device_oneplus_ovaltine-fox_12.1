@@ -80,8 +80,6 @@ jobs:
 
           git clone https://gitlab.com/OrangeFox/sync.git -b master
           cd sync
-          # 限制 repo sync 并发数，降低磁盘瞬时占用峰值，避免 runner 空间耗尽（No space left on device）
-          sed -i 's/-j$(nproc --all)/-j8/g' orangefox_sync.sh
           ./orangefox_sync.sh \
             --branch ${MANIFEST_BRANCH} \
             --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${MANIFEST_BRANCH}
