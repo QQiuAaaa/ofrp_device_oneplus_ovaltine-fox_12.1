@@ -1,0 +1,5 @@
+// Soong namespace for the OVALTINE (OnePlus 9 series) OrangeFox recovery device tree.
+// Mirrors the structure used by upstream TWRP device trees (e.g. android_device_OPPO_OP4ED5-twrp)
+// so that the device tree plays well with Soong-based module resolution.
+soong_namespace {
+}
