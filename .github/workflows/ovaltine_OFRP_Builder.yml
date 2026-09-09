@@ -19,7 +19,7 @@ on:
       DEVICE_TREE:
         description: 'OrangeFox 设备树'
         required: true
-        default: 'https://github.com/AQ1601/ofrp_device_oneplus_ovaltine-fox_12.1'
+        default: 'https://github.com/QQiuAaaa/ofrp_device_oneplus_ovaltine-fox_12.1_completed'
       DEVICE_TREE_BRANCH:
         description: 'OrangeFox 设备树分支'
         required: true
