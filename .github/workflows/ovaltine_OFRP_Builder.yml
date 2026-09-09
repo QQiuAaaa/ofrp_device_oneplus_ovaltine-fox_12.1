@@ -112,7 +112,7 @@ jobs:
           ./orangefox_sync.sh --branch ${{ inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
 
       - name: 📡 修复 fox_14.1 WLAN 支持
-        if: inputs.MANIFEST_BRANCH == '14.1'
+        if: inputs.MANIFEST_BRANCH == '0.0'
         run: |
           cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
           git clone https://github.com/adontoo/android_external_libmicrohttpd -b ofox-14.1 external/libmicrohttpd
