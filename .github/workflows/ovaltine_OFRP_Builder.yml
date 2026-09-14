@@ -160,41 +160,46 @@ jobs:
       - name: 🏷️ 生成发布元信息
         run: |
           echo "BUILD_DATE=$(TZ=Asia/Shanghai date +%Y%m%d)" >> $GITHUB_ENV
-          cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
-
-          DEVICE_TREE_URL="${{ inputs.DEVICE_TREE }}"
-          if [[ "${DEVICE_TREE_URL}" == *.git ]]; then
-            DEVICE_TREE_URL="${DEVICE_TREE_URL%.git}"
-          fi
-          echo "DEVICE_TREE_URL=${DEVICE_TREE_URL}" >> $GITHUB_ENV
 
       - name: 📦 规范化输出文件名
         run: |
-          OUT_DIR=${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}
+          echo "Searching OrangeFox artifacts..."
+          # 只在编译out目录查找，不再全局搜索！
+          ARTIFACT_ROOT="${GITHUB_WORKSPACE}/OrangeFox/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/${{ env.DEVICE_NAME }}"
+          mapfile -t FILES < <(
+            find "${ARTIFACT_ROOT}" \
+              -type f \( -name 'OrangeFox*.img' -o -name 'OrangeFox*.zip' \)
+          )
 
-          for f in "$OUT_DIR"/OrangeFox*.img "$OUT_DIR"/OrangeFox*.zip; do
-            [ -e "$f" ] || continue
+          if [[ ${#FILES[@]} -eq 0 ]]; then
+            echo "ERROR: No OrangeFox artifacts found in ${ARTIFACT_ROOT}"
+            exit 1
+          fi
+
+          for f in "${FILES[@]}"; do
+            dir=$(dirname "$f")
             base=$(basename "$f")
             ext="${base##*.}"
             name="${base%.*}"
-            mv "$f" "$OUT_DIR/${name}-${BUILD_DATE}.${ext}"
+            mv "$f" "$dir/${name}-${BUILD_DATE}.${ext}"
           done
 
       - name: 🚀 发布至 GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.run_id }}
-          name: OrangeFox Recovery for ${{ inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
+          tag_name: monthly-${{ env.BUILD_DATE }}
+          name: OrangeFox Recovery for ${{ env.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
+          # 直接匹配带日期后缀的文件
           files: |
-            OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}/OrangeFox*.img
-            OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}/OrangeFox*.zip
+            OrangeFox/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/${{ env.DEVICE_NAME }}/**/OrangeFox*.img
+            OrangeFox/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/${{ env.DEVICE_NAME }}/**/OrangeFox*.zip
           body: |
-            ## OrangeFox Recovery Build - Unofficial
+            ## OrangeFox Recovery Build (Automated)
 
-            Build Branch: fox_${{ inputs.MANIFEST_BRANCH }}
-            Build Target: ${{ inputs.BUILD_TARGET }}
-            Device Tree: ${{ inputs.DEVICE_TREE }}
-            Device Tree Branch: ${{ inputs.DEVICE_TREE_BRANCH }}
-            Commit: ${{ env.COMMIT_ID }}
-            Maintainer: ${{ inputs.OF_MAINTAINER }}
-            Build Date: ${{ env.BUILD_DATE }}
+            - Branch: fox_${{ env.MANIFEST_BRANCH }}
+            - Device: ${{ env.DEVICE_NAME }}
+            - Target: ${{ env.BUILD_TARGET }}
+            - Device Tree: ${{ env.DEVICE_TREE }}
+            - Commit: ${{ env.COMMIT_ID }}
+            - Maintainer: ${{ env.OF_MAINTAINER }}
+            - Build Date: ${{ env.BUILD_DATE }}
