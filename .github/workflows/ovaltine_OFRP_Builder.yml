@@ -164,15 +164,14 @@ jobs:
       - name: 📦 规范化输出文件名
         run: |
           echo "Searching OrangeFox artifacts..."
-          # 只在编译out目录查找，不再全局搜索！
-          ARTIFACT_ROOT="${GITHUB_WORKSPACE}/OrangeFox/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/${{ env.DEVICE_NAME }}"
+
           mapfile -t FILES < <(
-            find "${ARTIFACT_ROOT}" \
+            find "${GITHUB_WORKSPACE}/OrangeFox" \
               -type f \( -name 'OrangeFox*.img' -o -name 'OrangeFox*.zip' \)
           )
 
           if [[ ${#FILES[@]} -eq 0 ]]; then
-            echo "ERROR: No OrangeFox artifacts found in ${ARTIFACT_ROOT}"
+            echo "ERROR: No OrangeFox artifacts found"
             exit 1
           fi
 
@@ -189,7 +188,6 @@ jobs:
         with:
           tag_name: monthly-${{ env.BUILD_DATE }}
           name: OrangeFox Recovery for ${{ env.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
-          # 直接匹配带日期后缀的文件
           files: |
             OrangeFox/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/${{ env.DEVICE_NAME }}/**/OrangeFox*.img
             OrangeFox/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/${{ env.DEVICE_NAME }}/**/OrangeFox*.zip
